@@ -2,6 +2,13 @@
 An implementation of R-GCN for entity classification task by tensorflow
 
 **R-GCN**: Modeling Relational Data with Graph Convolutional Networks (https://github.com/MichSchli/RelationPrediction)   
+
+### dataset/
+**aifb**
+**am**  
+**bgs**
+**mutag**
+
 ```
 $ python Run_RGCN.py --dataset aifb --n_B 0 --h_dim 16 --dropout 0.0 --l2 0.0 --l_r 1e-2 --epoches 200 --earlystop 3
 ```
