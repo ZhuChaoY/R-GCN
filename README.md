@@ -10,6 +10,7 @@ An implementation of R-GCN for entity classification task by tensorflow
 **bgs**  
 **mutag**  
 
+#Running
 ```
 $ python Run_RGCN.py --dataset aifb --n_B 0 --h_dim 16 --dropout 0.0 --l2 0.0 --l_r 1e-2 --epoches 200 --earlystop 3
 ```
