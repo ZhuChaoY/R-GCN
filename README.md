@@ -1,6 +1,7 @@
 # R-GCN
 An implementation of R-GCN for entity classification task by tensorflow
 
+# Referred by
 **R-GCN**: Modeling Relational Data with Graph Convolutional Networks (https://github.com/MichSchli/RelationPrediction)   
 
 ### dataset/
