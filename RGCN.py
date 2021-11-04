@@ -22,13 +22,6 @@ class RGCN(): #2 layers
             self.keyword = 'instance'
             self.Y_dict = {'1': 0, '2': 1, '3': 2, '4': 3}
             self.loc = [2, -8]
-        elif self.dataset == 'am':
-            self.bans = ['objectCategory', 'material']
-            self.keyword = 'proxy'
-            self.Y_dict = {'5504': 0, '14592': 1, '15459': 2, '15579': 3,
-                           '15606': 4, '22503': 5, '22504': 6, '22505': 7,
-                           '22506': 8, '22507': 9, '22508': 10}  
-            self.loc = [2, 7]
         elif self.dataset == 'mutag':
             self.bans = ['isMutagenic']
             self.keyword = '#d'
@@ -113,12 +106,12 @@ class RGCN(): #2 layers
         print('    #{:<7} test  instances.'.format(len(test_range)))
         
         self.A = self.get_A()
-        self.m_train = self.get_m(train_range)
-        self.m_dev = self.get_m(dev_range)
-        self.m_test = self.get_m(test_range)
-        self.y_train = self.get_y(train_range)
-        self.y_dev = self.get_y(dev_range)
-        self.y_test = self.get_y(test_range)
+        self.train_m = self.get_m(train_range)
+        self.dev_m = self.get_m(dev_range)
+        self.test_m = self.get_m(test_range)
+        self.train_y = self.get_y(train_range)
+        self.dev_y = self.get_y(dev_range)
+        self.test_y = self.get_y(test_range)
 
 
     def get_A(self):
@@ -160,12 +153,12 @@ class RGCN(): #2 layers
         self.feed_dict = {self.supports[r]: self.A[r] for r in range(self.n_R)}
         self.mask = tf.placeholder(tf.float32, [self.n_E])
         self.label = tf.placeholder(tf.float32, [self.n_E, self.out_dim])
-        self.keep = tf.placeholder(tf.float32)
         
-        with tf.variable_scope('layer1'):
-            h_out = self.rgcn_layer(None, self.n_E, self.h_dim, tf.nn.relu)
-        with tf.variable_scope('layer2'):
-            output = self.rgcn_layer(h_out, self.h_dim, self.out_dim)
+        with tf.variable_scope('R-GCN'):
+            with tf.variable_scope('layer1'):
+                h_out = self.rgcn_layer(None, self.n_E, self.h_dim, tf.nn.relu)
+            with tf.variable_scope('layer2'):
+                output = self.rgcn_layer(h_out, self.h_dim, self.out_dim)
                             
         loss = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()]) 
         self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( \
@@ -214,7 +207,7 @@ class RGCN(): #2 layers
         if act:
             out = act(out)
             
-        return tf.nn.dropout(out, self.keep)
+        return out
         
     
     def _train(self, sess):  
@@ -226,30 +219,29 @@ class RGCN(): #2 layers
         
         temp_kpi, KPI = [], []
         t0 = t1 = time.time()
-        for epoch in range(eps):
-            feed_dict = {self.label: self.y_train, self.mask: self.m_train,
-                         self.keep: 1.0 - self.dropout}
+        for ep in range(eps):
+            feed_dict = {self.label: self.train_y, self.mask: self.train_m}
             feed_dict.update(self.feed_dict)
-            _, loss_train, acc_train = \
+            _, train_loss, train_acc = \
                 sess.run([self.train_op, self.loss, self.accuracy], feed_dict)
-            loss_dev, acc_dev = self._evaluate(sess)
-            if (epoch + 1) % 5 == 0:
+            dev_loss, dev_acc = self._evaluate(sess)
+            if (ep + 1) % 5 == 0:
                 _t = time.time()
                 print('    {:^5} {:^6.4f} {:^5.3f}  {:^6.4f} {:^5.3f}' \
-                      ' {:^6.2f} {:^6.2f}'.format(epoch + 1, loss_train,
-                      acc_train, loss_dev, acc_dev, _t - t1, _t - t0))
+                      ' {:^6.2f} {:^6.2f}'.format(ep + 1, train_loss,
+                      train_acc, dev_loss, dev_acc, _t - t1, _t - t0))
                 t1 = _t
         
-            if epoch == 0 or loss_dev < KPI[-1]:
+            if ep == 0 or dev_loss < KPI[-1]:
                 if len(temp_kpi) > 0:
                     KPI.extend(temp_kpi)
                     temp_kpi = []
-                KPI.append(loss_dev)
+                KPI.append(dev_loss)
             else:
                 if len(temp_kpi) == self.earlystop:
                     break
                 else:
-                    temp_kpi.append(loss_dev)
+                    temp_kpi.append(dev_loss)
                     
         best_ep = len(KPI)
         if best_ep != eps:
@@ -259,8 +251,7 @@ class RGCN(): #2 layers
     def _evaluate(self, sess):
         """Validation Process."""
         
-        feed_dict = {self.label: self.y_dev, self.mask: self.m_dev, 
-                     self.keep: 1.0}
+        feed_dict = {self.label: self.dev_y, self.mask: self.dev_m}
         feed_dict.update(self.feed_dict)
         return sess.run([self.loss, self.accuracy], feed_dict)
 
@@ -268,8 +259,7 @@ class RGCN(): #2 layers
     def _test(self, sess):
         """Test Process."""
         
-        feed_dict = {self.label: self.y_test, self.mask: self.m_test, 
-                     self.keep: 1.0}
+        feed_dict = {self.label: self.test_y, self.mask: self.test_m}
         feed_dict.update(self.feed_dict)
         loss_test, acc_test = sess.run([self.loss, self.accuracy], feed_dict)
         print('\n    Test : [ Loss: {:.4f} ; Acc : {:.3f} ]\n'. \
@@ -288,7 +278,6 @@ class RGCN(): #2 layers
             if i == 0:       
                 print('\n    *Number of basis : {}'.format(self.n_B))
                 print('    *Hidden Dim      : {}'.format(self.h_dim))
-                print('    *Drop Out Rate   : {}'.format(self.dropout))
                 print('    *L2 Rate         : {}'.format(self.l2))
                 print('    *Learning Rate   : {}'.format(self.l_r))
                 print('    *Epoches         : {}'.format(self.epoches))
