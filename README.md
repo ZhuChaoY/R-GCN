@@ -16,4 +16,4 @@ python Run_RGCN.py --dataset mutag --n_B 40 --h_dim 16 --dropout 0.0 --l2 5e-4 -
 # Results (10 runs)                    
 |         |    **aifb**   |    **bgs**    |   **mutag**   |  
 |    --   |      --       |      --       |      --       |  
-|**R-GCN**| 0.958 (0.019) |               | 0.687 (0.024) |     
+|**R-GCN**| 0.967 (0.017) |               | 0.687 (0.024) |     
