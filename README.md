@@ -13,7 +13,7 @@ An implementation of R-GCN for entity classification task by tensorflow.
 python Run_RGCN.py --dataset aifb --n_B 0 --h_dim 16 --l2 0.0 --l_r 1e-2
 ```
 ```
-python Run_RGCN.py --dataset aifb --n_B 0 --h_dim 16 --l2 5e-4 --l_r 1e-2
+python Run_RGCN.py --dataset bgs --n_B 0 --h_dim 16 --l2 5e-4 --l_r 1e-2
 ```
 ```
 python Run_RGCN.py --dataset mutag --n_B 100 --h_dim 16 --l2 5e-4 --l_r 1e-2
