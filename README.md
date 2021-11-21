@@ -2,7 +2,7 @@
 An implementation of R-GCN for entity classification task by tensorflow.
 
 ## Reference
-**R-GCN**: Modeling Relational Data with Graph Convolutional Networks (https://github.com/MichSchli/RelationPrediction)   
+**R-GCN**: [Modeling Relational Data with Graph Convolutional Networks](https://arxiv.org/pdf/1703.06103v4.pdf) (Code: https://github.com/MichSchli/RelationPrediction)   
 
 ## Results (10 runs)                    
 |         |    **aifb**   |    **bgs**    |   **mutag**   |  
