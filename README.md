@@ -7,14 +7,14 @@ An implementation of R-GCN for entity classification task by tensorflow.
 ## Results (10 runs)                    
 |         |    **aifb**   |    **bgs**    |   **mutag**   |  
 |    --   |      --       |      --       |      --       |  
-|**R-GCN**| 0.967 (0.017) | 0.852 (0.016) | 0.725 (0.017) |     
+|**R-GCN**| 0.958 (0.022) | 0.852 (0.016) | 0.703 (0.038) |     
 
 ```
-python Run_RGCN.py --dataset aifb --n_B 0 --h_dim 16 --l2 0.0 --l_r 1e-2
+python Run_RGCN.py --dataset aifb --h_dim 16 --n_B 0 --dropout 0.0 --l2 0.0 --l_r 1e-2
 ```
 ```
-python Run_RGCN.py --dataset bgs --n_B 0 --h_dim 16 --l2 5e-4 --l_r 1e-2
+python Run_RGCN.py --dataset bgs --h_dim 16 --n_B 0 --dropout 0.0 --l2 5e-4 --l_r 1e-2
 ```
 ```
-python Run_RGCN.py --dataset mutag --n_B 100 --h_dim 16 --l2 5e-4 --l_r 1e-2
+python Run_RGCN.py --dataset mutag --h_dim 16 --n_B 100 --dropout 0.2 --l2 5e-4 --l_r 1e-2
 ```
